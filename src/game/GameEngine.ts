@@ -1,6 +1,5 @@
 import { MapGenerator, Cell } from './MapGenerator';
 import { Tank, Bullet, Item, Mine, SkillType } from './Entities';
-import { AIController } from './AIController';
 import { Rect, circleCircleCollide } from './utils';
 
 export class GameEngine {
@@ -31,7 +30,6 @@ export class GameEngine {
   reqId = 0;
   
   keys: Record<string, boolean> = {};
-  aiController: AIController | null = null;
   
   itemSpawnTimer = 5;
   
@@ -63,13 +61,9 @@ export class GameEngine {
     const p2Cell = this.cells[this.cells.length - 1];
     
     const p1 = new Tank('Player 1', p1Cell.c * this.cellSize + this.cellSize/2, p1Cell.r * this.cellSize + this.cellSize/2, 0, '#3b82f6', this.p1Skill);
-    const p2 = new Tank(this.mode === 'pve' ? 'AI' : 'Player 2', p2Cell.c * this.cellSize + this.cellSize/2, p2Cell.r * this.cellSize + this.cellSize/2, Math.PI, '#ef4444', this.p2Skill, this.mode === 'pve');
+    const p2 = new Tank('Player 2', p2Cell.c * this.cellSize + this.cellSize/2, p2Cell.r * this.cellSize + this.cellSize/2, Math.PI, '#ef4444', this.p2Skill);
     
     this.tanks.push(p1, p2);
-    
-    if (this.mode === 'pve') {
-      this.aiController = new AIController(p2, p1, this.difficulty, this.cells, this.cols, this.cellSize, this.walls);
-    }
     
     this.lastTime = performance.now();
     this.reqId = requestAnimationFrame(this.loop);
@@ -81,8 +75,25 @@ export class GameEngine {
     cancelAnimationFrame(this.reqId);
   }
   
-  handleKeyDown(e: KeyboardEvent) { this.keys[e.key.toLowerCase()] = true; }
-  handleKeyUp(e: KeyboardEvent) { this.keys[e.key.toLowerCase()] = false; }
+  handleKeyDown(e: KeyboardEvent) { 
+    this.keys[e.code] = true; 
+    if (e.key) this.keys[e.key.toLowerCase()] = true;
+    
+    // Prevent default browser actions for game keys (scrolling, IME composition, etc.)
+    const gameKeys = ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ', 'w', 'a', 's', 'd', 'q', 'e', 'm', 'shift'];
+    if (e.key && gameKeys.includes(e.key.toLowerCase())) {
+      e.preventDefault();
+    }
+  }
+  handleKeyUp(e: KeyboardEvent) { 
+    this.keys[e.code] = false; 
+    if (e.key) this.keys[e.key.toLowerCase()] = false;
+    
+    const gameKeys = ['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' ', 'w', 'a', 's', 'd', 'q', 'e', 'm', 'shift'];
+    if (e.key && gameKeys.includes(e.key.toLowerCase())) {
+      e.preventDefault();
+    }
+  }
   
   fireBullet = (tank: Tank) => {
     let type = tank.powerup || 'normal';
@@ -142,23 +153,20 @@ export class GameEngine {
     }
     
     const p1Input = {
-      forward: this.keys['w'], backward: this.keys['s'],
-      left: this.keys['a'], right: this.keys['d'],
-      shoot: this.keys['q'] || this.keys[' '],
-      useSkill: this.keys['e']
+      forward: this.keys['KeyW'] || this.keys['w'], 
+      backward: this.keys['KeyS'] || this.keys['s'],
+      left: this.keys['KeyA'] || this.keys['a'], 
+      right: this.keys['KeyD'] || this.keys['d'],
+      shoot: this.keys['KeyQ'] || this.keys['q'] || this.keys['Space'] || this.keys[' '],
+      useSkill: this.keys['KeyE'] || this.keys['e']
     };
     
-    let p2Input = { forward: false, backward: false, left: false, right: false, shoot: false, useSkill: false };
-    if (this.mode === 'pvp') {
-      p2Input = {
-        forward: this.keys['arrowup'], backward: this.keys['arrowdown'],
-        left: this.keys['arrowleft'], right: this.keys['arrowright'],
-        shoot: this.keys['m'] || this.keys['enter'],
-        useSkill: this.keys['shift']
-      };
-    } else if (this.aiController) {
-      p2Input = this.aiController.update(dt);
-    }
+    let p2Input = {
+      forward: this.keys['ArrowUp'], backward: this.keys['ArrowDown'],
+      left: this.keys['ArrowLeft'], right: this.keys['ArrowRight'],
+      shoot: this.keys['KeyM'] || this.keys['m'] || this.keys['Enter'],
+      useSkill: this.keys['ShiftLeft'] || this.keys['ShiftRight'] || this.keys['shift']
+    };
     
     for (const tank of this.tanks) {
       if (!tank.active) continue;

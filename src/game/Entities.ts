@@ -162,8 +162,6 @@ export class Tank {
   speed: number = 150;
   rotSpeed: number = Math.PI;
   
-  isAI: boolean = false;
-  
   powerup: string | null = null;
   powerupTimer: number = 0;
   shieldTimer: number = 0;
@@ -179,15 +177,19 @@ export class Tank {
   
   cooldown: number = 0;
   active: boolean = true;
+
+  bulletsFired: number = 0;
+  maxBullets: number = 5;
+  reloadTimer: number = 0;
+  reloadTime: number = 2;
   
-  constructor(id: string, x: number, y: number, angle: number, color: string, skill: SkillType, isAI: boolean = false) {
+  constructor(id: string, x: number, y: number, angle: number, color: string, skill: SkillType) {
     this.id = id;
     this.x = x;
     this.y = y;
     this.angle = angle;
     this.color = color;
     this.skill = skill;
-    this.isAI = isAI;
   }
   
   update(dt: number, walls: Rect[], terrainType: string, input: { forward: boolean, backward: boolean, left: boolean, right: boolean, shoot: boolean, useSkill: boolean }, fireCallback: (t: Tank) => void, skillCallback: (t: Tank) => void) {
@@ -201,6 +203,13 @@ export class Tank {
     if (this.cooldown > 0) this.cooldown -= dt;
     if (this.skillCooldown > 0) this.skillCooldown -= dt;
     
+    if (this.reloadTimer > 0) {
+      this.reloadTimer -= dt;
+      if (this.reloadTimer <= 0) {
+        this.bulletsFired = 0;
+      }
+    }
+
     if (this.ghostTimer > 0) this.ghostTimer -= dt;
     if (this.empTimer > 0) this.empTimer -= dt;
     if (this.homingTimer > 0) this.homingTimer -= dt;
@@ -255,9 +264,16 @@ export class Tank {
       if (canMoveY) this.y = nextY;
     }
     
-    if (input.shoot && this.cooldown <= 0) {
+    if (input.shoot && this.cooldown <= 0 && this.reloadTimer <= 0) {
       fireCallback(this);
       this.cooldown = this.powerup === 'machinegun' ? 0.1 : 0.25;
+      
+      if (this.powerup !== 'machinegun') {
+        this.bulletsFired++;
+        if (this.bulletsFired >= this.maxBullets) {
+          this.reloadTimer = this.reloadTime;
+        }
+      }
     }
   }
   
@@ -303,6 +319,21 @@ export class Tank {
       ctx.fillRect(this.x - 15, this.y + 20, 30, 4);
       ctx.fillStyle = '#10b981';
       ctx.fillRect(this.x - 15, this.y + 20, 30 * ratio, 4);
+    }
+
+    // Draw reload bar or bullets
+    if (this.reloadTimer > 0) {
+      const ratio = 1 - (this.reloadTimer / this.reloadTime);
+      ctx.fillStyle = '#ef4444';
+      ctx.fillRect(this.x - 15, this.y + 25, 30, 4);
+      ctx.fillStyle = '#fca5a5';
+      ctx.fillRect(this.x - 15, this.y + 25, 30 * ratio, 4);
+    } else {
+      const pipWidth = 30 / this.maxBullets;
+      for (let i = 0; i < this.maxBullets; i++) {
+        ctx.fillStyle = i < this.maxBullets - this.bulletsFired ? '#fcd34d' : '#4b5563';
+        ctx.fillRect(this.x - 15 + i * pipWidth, this.y + 25, pipWidth - 1, 4);
+      }
     }
   }
 }

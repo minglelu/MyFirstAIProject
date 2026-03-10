@@ -5,13 +5,11 @@
 
 import React, { useState } from 'react';
 import GameCanvas from './components/GameCanvas';
-import { Swords, Bot, Trophy, Zap, Ghost, Bomb, Radio, Target, Info, X } from 'lucide-react';
+import { Swords, Trophy, Zap, Ghost, Bomb, Radio, Target, Info, X } from 'lucide-react';
 import { SkillType } from './game/Entities';
 
 export default function App() {
   const [gameState, setGameState] = useState<'menu' | 'playing' | 'gameover'>('menu');
-  const [mode, setMode] = useState<'pve' | 'pvp'>('pve');
-  const [difficulty, setDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [winner, setWinner] = useState<string>('');
   const [showGuide, setShowGuide] = useState(false);
   
@@ -28,11 +26,11 @@ export default function App() {
   };
 
   const skills: { id: SkillType, name: string, icon: React.ReactNode, desc: string }[] = [
-    { id: 'dash', name: 'Dash', icon: <Zap size={16} />, desc: 'Quick burst of speed' },
-    { id: 'ghost', name: 'Ghost', icon: <Ghost size={16} />, desc: 'Pass through walls' },
-    { id: 'mine', name: 'Mine', icon: <Bomb size={16} />, desc: 'Drop an explosive' },
-    { id: 'emp', name: 'EMP', icon: <Radio size={16} />, desc: 'Stun enemies' },
-    { id: 'homing', name: 'Homing', icon: <Target size={16} />, desc: 'Auto-aim bullets' },
+    { id: 'dash', name: '冲刺', icon: <Zap size={16} />, desc: '瞬间高速移动' },
+    { id: 'ghost', name: '幽灵', icon: <Ghost size={16} />, desc: '穿透墙壁' },
+    { id: 'mine', name: '地雷', icon: <Bomb size={16} />, desc: '放置爆炸物' },
+    { id: 'emp', name: '电磁脉冲', icon: <Radio size={16} />, desc: '瘫痪敌人' },
+    { id: 'homing', name: '追踪', icon: <Target size={16} />, desc: '子弹自动追踪' },
   ];
 
   return (
@@ -48,48 +46,13 @@ export default function App() {
           </button>
 
           <h1 className="text-4xl font-black text-center mb-8 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-red-500">
-            TANK TURMOIL
+            坦克动荡
           </h1>
           
           <div className="space-y-6">
-            <div>
-              <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2 block">Game Mode / 游戏模式</label>
-              <div className="grid grid-cols-2 gap-3">
-                <button 
-                  onClick={() => setMode('pve')}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all ${mode === 'pve' ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/50' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}
-                >
-                  <Bot size={18} /> VS AI (人机对战)
-                </button>
-                <button 
-                  onClick={() => setMode('pvp')}
-                  className={`flex items-center justify-center gap-2 py-3 rounded-xl font-medium transition-all ${mode === 'pvp' ? 'bg-red-600 text-white shadow-lg shadow-red-900/50' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}
-                >
-                  <Swords size={18} /> 2 Player (双人对战)
-                </button>
-              </div>
-            </div>
-
-            {mode === 'pve' && (
-              <div>
-                <label className="text-xs font-bold text-zinc-400 uppercase tracking-wider mb-2 block">AI Difficulty / AI难度</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {['easy', 'medium', 'hard'].map(d => (
-                    <button 
-                      key={d}
-                      onClick={() => setDifficulty(d as any)}
-                      className={`py-2 rounded-lg text-sm font-medium capitalize transition-all ${difficulty === d ? 'bg-zinc-200 text-zinc-900' : 'bg-zinc-800 text-zinc-400 hover:bg-zinc-700'}`}
-                    >
-                      {d === 'easy' ? '简单' : d === 'medium' ? '中等' : '困难'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             <div className="grid grid-cols-2 gap-6">
               <div>
-                <label className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 block">Player 1 Skill / 玩家1技能</label>
+                <label className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-2 block">玩家1技能</label>
                 <div className="space-y-2">
                   {skills.map(s => (
                     <button
@@ -108,7 +71,7 @@ export default function App() {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2 block">{mode === 'pve' ? 'AI Skill / AI技能' : 'Player 2 Skill / 玩家2技能'}</label>
+                <label className="text-xs font-bold text-red-400 uppercase tracking-wider mb-2 block">玩家2技能</label>
                 <div className="space-y-2">
                   {skills.map(s => (
                     <button
@@ -129,9 +92,9 @@ export default function App() {
 
             <button 
               onClick={startGame}
-              className="w-full py-4 mt-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-lg rounded-xl transition-all shadow-lg shadow-emerald-900/20"
+              className="w-full py-4 mt-4 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-lg rounded-xl transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2"
             >
-              START BATTLE / 开始战斗
+              <Swords size={24} /> 开始双人对战
             </button>
           </div>
         </div>
@@ -147,7 +110,7 @@ export default function App() {
               <X size={20} />
             </button>
             
-            <h2 className="text-2xl font-black mb-6 text-blue-400">📖 坦克动荡 (Tank Turmoil) - 新手指南</h2>
+            <h2 className="text-2xl font-black mb-6 text-blue-400">📖 坦克动荡 - 新手指南</h2>
             
             <div className="space-y-6 text-zinc-300 text-sm leading-relaxed">
               <section>
@@ -162,6 +125,7 @@ export default function App() {
                 <h3 className="text-lg font-bold text-white mb-2 border-b border-zinc-700 pb-1">⚠️ 核心机制 (必看!)</h3>
                 <ul className="list-disc pl-5 space-y-1">
                   <li><strong>子弹反弹：</strong> 射出的子弹会在墙壁上反弹（默认弹跳5次）。<span className="text-red-400 font-bold">小心！你自己的子弹也会炸死你自己！</span></li>
+                  <li><strong>子弹冷却：</strong> 连续发射5发子弹后，坦克将进入2秒的装填冷却时间（血条下方红条显示）。</li>
                   <li><strong>地形影响：</strong> 黑色是普通地面；深棕色是泥地（减速50%）；深蓝色是冰面（转向变得困难）。</li>
                   <li><strong>随机地图：</strong> 每次开局都会生成一个全新的迷宫。</li>
                 </ul>
@@ -170,12 +134,12 @@ export default function App() {
               <section>
                 <h3 className="text-lg font-bold text-white mb-2 border-b border-zinc-700 pb-1">🎁 战场道具 (吃掉它们获得强化)</h3>
                 <div className="grid grid-cols-2 gap-2">
-                  <div><span className="inline-block w-4 h-4 rounded-full bg-red-500 align-middle mr-2"></span><strong>S (Shotgun)</strong>: 霰弹，一次发射三发子弹。</div>
-                  <div><span className="inline-block w-4 h-4 rounded-full bg-green-500 align-middle mr-2"></span><strong>L (Laser)</strong>: 激光，极速子弹，不反弹。</div>
-                  <div><span className="inline-block w-4 h-4 rounded-full bg-yellow-500 align-middle mr-2"></span><strong>B (Bouncy)</strong>: 弹跳弹，可在墙上反弹12次！</div>
-                  <div><span className="inline-block w-4 h-4 rounded-full bg-fuchsia-500 align-middle mr-2"></span><strong>M (Machinegun)</strong>: 机枪，极大幅度缩短射击冷却。</div>
-                  <div><span className="inline-block w-4 h-4 rounded-full bg-blue-500 align-middle mr-2"></span><strong>S (Speed)</strong>: 加速，提升坦克移动速度。</div>
-                  <div><span className="inline-block w-4 h-4 rounded-full bg-cyan-500 align-middle mr-2"></span><strong>Shield</strong>: 护盾，获得5秒无敌状态。</div>
+                  <div><span className="inline-block w-4 h-4 rounded-full bg-red-500 align-middle mr-2"></span><strong>S (霰弹)</strong>: 一次发射三发子弹。</div>
+                  <div><span className="inline-block w-4 h-4 rounded-full bg-green-500 align-middle mr-2"></span><strong>L (激光)</strong>: 极速子弹，不反弹。</div>
+                  <div><span className="inline-block w-4 h-4 rounded-full bg-yellow-500 align-middle mr-2"></span><strong>B (弹跳弹)</strong>: 可在墙上反弹12次！</div>
+                  <div><span className="inline-block w-4 h-4 rounded-full bg-fuchsia-500 align-middle mr-2"></span><strong>M (机枪)</strong>: 极大幅度缩短射击冷却，且不消耗弹药。</div>
+                  <div><span className="inline-block w-4 h-4 rounded-full bg-blue-500 align-middle mr-2"></span><strong>S (加速)</strong>: 提升坦克移动速度。</div>
+                  <div><span className="inline-block w-4 h-4 rounded-full bg-cyan-500 align-middle mr-2"></span><strong>护盾</strong>: 获得5秒无敌状态。</div>
                 </div>
               </section>
 
@@ -183,11 +147,11 @@ export default function App() {
                 <h3 className="text-lg font-bold text-white mb-2 border-b border-zinc-700 pb-1">⚡ 主动技能 (开局前选择)</h3>
                 <p className="mb-2 text-zinc-400">技能有8秒冷却时间（坦克下方的绿条显示冷却进度）。</p>
                 <ul className="list-disc pl-5 space-y-1">
-                  <li><strong>Dash (冲刺)</strong>: 瞬间向前高速冲刺一段距离。</li>
-                  <li><strong>Ghost (幽灵)</strong>: 3秒内变成半透明，可以直接穿透墙壁！</li>
-                  <li><strong>Mine (地雷)</strong>: 在原地放下一颗地雷，1秒后启动，踩中即死。</li>
-                  <li><strong>EMP (电磁脉冲)</strong>: 瞬间瘫痪全图敌人，使其2秒内无法移动和射击。</li>
-                  <li><strong>Homing (追踪)</strong>: 接下来4秒内，你发射的子弹会自动拐弯追踪敌人。</li>
+                  <li><strong>冲刺</strong>: 瞬间向前高速冲刺一段距离。</li>
+                  <li><strong>幽灵</strong>: 3秒内变成半透明，可以直接穿透墙壁！</li>
+                  <li><strong>地雷</strong>: 在原地放下一颗地雷，1秒后启动，踩中即死。</li>
+                  <li><strong>电磁脉冲</strong>: 瞬间瘫痪全图敌人，使其2秒内无法移动和射击。</li>
+                  <li><strong>追踪</strong>: 接下来4秒内，你发射的子弹会自动拐弯追踪敌人。</li>
                 </ul>
               </section>
             </div>
@@ -205,38 +169,38 @@ export default function App() {
       {gameState === 'playing' && (
         <div className="flex flex-col items-center">
           <div className="w-full max-w-4xl flex justify-between items-center mb-4 px-4">
-            <h2 className="text-xl font-black tracking-tight">TANK TURMOIL</h2>
+            <h2 className="text-xl font-black tracking-tight">坦克动荡</h2>
             <button 
               onClick={() => setGameState('menu')}
               className="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm font-medium transition-colors"
             >
-              Quit / 退出
+              退出
             </button>
           </div>
-          <GameCanvas mode={mode} difficulty={difficulty} p1Skill={p1Skill} p2Skill={p2Skill} onGameOver={handleGameOver} />
+          <GameCanvas mode="pvp" difficulty="medium" p1Skill={p1Skill} p2Skill={p2Skill} onGameOver={handleGameOver} />
         </div>
       )}
 
       {gameState === 'gameover' && (
         <div className="bg-zinc-900 p-8 rounded-2xl shadow-2xl max-w-sm w-full border border-zinc-800 text-center">
-          <Trophy size={48} className={`mx-auto mb-4 ${winner === 'Player 1' ? 'text-blue-500' : winner === 'Player 2' || winner === 'AI' ? 'text-red-500' : 'text-zinc-400'}`} />
+          <Trophy size={48} className={`mx-auto mb-4 ${winner === 'Player 1' ? 'text-blue-500' : winner === 'Player 2' ? 'text-red-500' : 'text-zinc-400'}`} />
           <h2 className="text-3xl font-black mb-2">
-            {winner === 'Draw' ? 'DRAW! / 平局!' : `${winner} WINS! / 获胜!`}
+            {winner === 'Draw' ? '平局!' : `${winner === 'Player 1' ? '玩家1' : '玩家2'} 获胜!`}
           </h2>
-          <p className="text-zinc-400 mb-8">What a battle. / 精彩的战斗。</p>
+          <p className="text-zinc-400 mb-8">精彩的战斗。</p>
           
           <div className="space-y-3">
             <button 
               onClick={startGame}
               className="w-full py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold rounded-xl transition-all"
             >
-              Play Again / 再来一局
+              再来一局
             </button>
             <button 
               onClick={() => setGameState('menu')}
               className="w-full py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold rounded-xl transition-all"
             >
-              Main Menu / 返回主菜单
+              返回主菜单
             </button>
           </div>
         </div>
